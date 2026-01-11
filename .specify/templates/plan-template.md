@@ -31,7 +31,11 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+- [ ] Security: Strict isolation and JWT integrity enforced?
+- [ ] Accuracy: Backend-Frontend-Database synchronization verified?
+- [ ] Reliability: Error handling (401, 404, 500) and status codes defined?
+- [ ] Usability: Responsive layout and UX intuition planned?
+- [ ] Reproducibility: Setup documentation and env vars defined?
 
 ## Project Structure
 

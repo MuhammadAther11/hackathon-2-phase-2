@@ -60,14 +60,12 @@ description: "Task list template for feature implementation"
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-Examples of foundational tasks (adjust based on your project):
-
-- [ ] T004 Setup database schema and migrations framework
-- [ ] T005 [P] Implement authentication/authorization framework
-- [ ] T006 [P] Setup API routing and middleware structure
-- [ ] T007 Create base models/entities that all stories depend on
-- [ ] T008 Configure error handling and logging infrastructure
-- [ ] T009 Setup environment configuration management
+- [ ] T004 Setup Neon PostgreSQL schema and SQLModel entities
+- [ ] T005 [P] Implement Better Auth JWT integration (using BETTER_AUTH_SECRET)
+- [ ] T006 [P] Configure FastAPI routing with dependency injection for auth
+- [ ] T007 Create base Task model with user_id relationship (ownership enforcement)
+- [ ] T008 Configure global exception handlers for REST compliance
+- [ ] T009 Setup .env.example with required variables
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 

@@ -1,8 +1,38 @@
-# Claude Code Rules
+﻿# Claude Code Rules
 
 This file is generated during init for the selected agent.
 
-You are an expert AI assistant specializing in Spec-Driven Development (SDD). Your primary goal is to work with the architext to build products.
+You are an expert AI assistant specializing in Spec-Driven Development (SDD). Your primary goal is to work with the architect to build a modern multi-user web application with persistent storage.
+
+## Project Vision & Tech Stack
+
+**Objective:** Transform the console app into a multi-user web application using the Agentic Dev Stack workflow (Spec → Plan → Tasks → Implement).
+
+| Layer | Technology |
+| :--- | :--- |
+| **Frontend** | Next.js 16+ (App Router), Tailwind CSS, React Query |
+| **Backend** | Python FastAPI |
+| **ORM** | SQLModel |
+| **Database** | Neon Serverless PostgreSQL |
+| **Spec-Driven** | Claude Code + Spec-Kit Plus |
+| **Authentication** | Better Auth (JWT-based) |
+
+## Frontend Architecture
+- **Framework**: Next.js 15 (App Router)
+- **State Management**: @tanstack/react-query
+- **Styling**: Tailwind CSS + Lucide React icons
+- **Fetch**: Centralized `apiFetch` in `src/lib/api-client.ts` with JWT injection
+- **Auth**: Better Auth React client in `src/lib/auth-client.ts`
+- **Protection**: Server-side redirects via `middleware.ts`
+
+## Specialized Agent Mandate
+
+When executing tasks, you MUST delegate to the following specialized agents via the `Task` tool:
+
+- **Auth Agent (`auth-security-architect`):** Use for all authentication and security implementations, including Better Auth configuration, JWT issuance, and signup/signin flows.
+- **Frontend Agent (`responsive-nextjs-ui`):** Use for building the responsive Next.js interface, layout design, and client-side logic.
+- **DB Agent (`neon-db-manager`):** Use for database schema design, Neon migrations, and SQL optimizations.
+- **Backend Agent (`fastapi-backend-developer`):** Use for developing the FastAPI RESTful API, Pydantic models, and JWT verification logic.
 
 ## Task context
 

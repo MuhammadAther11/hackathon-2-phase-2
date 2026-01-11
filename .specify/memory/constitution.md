@@ -1,55 +1,72 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report:
+Version change: [CONSTITUTION_VERSION_OLD] -> 1.0.0
+List of modified principles:
+- [PRINCIPLE_1_NAME] -> I. Security & Isolation
+- [PRINCIPLE_2_NAME] -> II. Accuracy & State Integrity
+- [PRINCIPLE_3_NAME] -> III. Reliability & Error Handling
+- [PRINCIPLE_4_NAME] -> IV. Usability & Responsiveness
+- [PRINCIPLE_5_NAME] -> V. Reproducibility & Documentation
+Added sections:
+- Key Standards
+- Constraints
+- Success Criteria
+Removed sections: none
+Templates requiring updates:
+- .specify/templates/plan-template.md (✅ updated)
+- .specify/templates/spec-template.md (✅ updated)
+- .specify/templates/tasks-template.md (✅ updated)
+Follow-up TODOs: none
+-->
+
+# Todo Full-Stack Web Application Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Security & Isolation
+All authentication flows must ensure strict user isolation and JWT token integrity. Access control must be enforced at every layer to prevent unauthorized data access or modification.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. Accuracy & State Integrity
+Backend operations must correctly reflect frontend actions and synchronize perfectly with the database state. Data consistency is non-negotiable across all system boundaries.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. Reliability & Error Handling
+APIs must handle errors gracefully, return appropriate HTTP status codes, and maintain consistent data even under failure conditions. System stability is a primary goal.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. Usability & Responsiveness
+The frontend interface must be responsive, intuitive, and user-friendly across both desktop and mobile views. User experience must be consistent and logical.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### V. Reproducibility & Documentation
+All operations, configurations, and environment setups must be documented thoroughly. The project must be easily reproducible in a new environment with minimal manual effort.
 
-### [PRINCIPLE_6_NAME]
+## Key Standards
 
+- **Authentication**: All API calls require a valid JWT token; unauthorized requests MUST return 401.
+- **API Compliance**: Endpoints MUST follow REST conventions with proper HTTP methods and status codes.
+- **Database Integrity**: Task ownership MUST be enforced at the schema/query level; data stored persistently in Neon PostgreSQL.
+- **Frontend Integration**: Next.js frontend MUST attach JWT to all requests and display server responses accurately.
+- **Coding & Documentation**: Clear, readable code with purposeful comments; environment variables MUST be documented in `.env.example`.
 
-[PRINCIPLE__DESCRIPTION]
+## Constraints
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+- **Feature Set**: Implementation MUST include: task listing, creation, updating, deletion, and toggle status.
+- **Viewport Support**: Responsive frontend supporting desktop and mobile views.
+- **Security Config**: JWT tokens configured with shared secret via `BETTER_AUTH_SECRET`.
+- **Backend Stack**: FastAPI + SQLModel ORM.
+- **Frontend Stack**: Next.js 16+ using App Router.
+- **Workflow**: 100% of implementation MUST be generated via Spec-Driven Development (SDD) workflow.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+## Success Criteria
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
-
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+- All API endpoints functional and secure against unauthorized access.
+- User authentication flows (signup/signin) fully operational.
+- Task operations correctly linked to authenticated users (no cross-user leakage).
+- Responsive UI properly integrated with backend services.
+- Documentation complete for setup, JWT integration, and task management.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+- This constitution supersedes all other project practices.
+- Amendments require a version bump and rationale in the Sync Impact Report.
+- All implementation tasks must verify compliance with these principles.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.0 | **Ratified**: 2026-01-09 | **Last Amended**: 2026-01-09
