@@ -5,7 +5,7 @@ import { CheckCircle2, Circle, Trash2, Clock } from "lucide-react";
 
 interface TaskItemProps {
   task: FrontendTask;
-  onToggle: (id: string, completed: boolean) => void;
+  onToggle: (id: string) => void;  // Updated to only take id
   onDelete: (id: string) => void;
 }
 
@@ -14,7 +14,7 @@ export function TaskItem({ task, onToggle, onDelete }: TaskItemProps) {
     <div className="flex items-center justify-between p-4 bg-white rounded-lg border border-gray-200 shadow-sm hover:border-indigo-200 transition-colors group">
       <div className="flex items-center space-x-4 flex-1 min-w-0">
         <button
-          onClick={() => onToggle(task.id, !task.is_completed)}
+          onClick={() => onToggle(task.id)}  // Updated call
           className={`focus:outline-none transition-colors ${
             task.is_completed ? "text-green-500" : "text-gray-400 group-hover:text-indigo-500"
           }`}

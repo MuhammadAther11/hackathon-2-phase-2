@@ -1,106 +1,85 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlmodel import Session, select
+from sqlmodel import Session
 from typing import List
 from uuid import UUID
 
 from src.database import get_session
 from src.models.task import Task, TaskCreate, TaskUpdate
-from src.auth.jwt import get_current_user
+from src.middleware.auth import get_current_user_id
+from src.services.task_service import (
+    get_user_tasks,
+    create_task,
+    get_task_by_id,
+    update_task,
+    delete_task,
+    toggle_task_completion
+)
 
-router = APIRouter(prefix="/api/{user_id}/tasks", tags=["tasks"])
-
-async def verify_user_match(user_id: str, current_user_id: str = Depends(get_current_user)):
-    if user_id != current_user_id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="User ID mismatch"
-        )
-    return current_user_id
-
-@router.post("/", response_model=Task, status_code=status.HTTP_201_CREATED)
-async def create_task(
-    user_id: str,
-    task: TaskCreate,
-    session: Session = Depends(get_session),
-    current_user_id: str = Depends(verify_user_match)
-):
-    db_task = Task.model_validate(task, update={"user_id": current_user_id})
-    session.add(db_task)
-    session.commit()
-    session.refresh(db_task)
-    return db_task
+router = APIRouter(prefix="/tasks", tags=["tasks"])
 
 @router.get("/", response_model=List[Task])
 async def read_tasks(
-    user_id: str,
-    session: Session = Depends(get_session),
-    current_user_id: str = Depends(verify_user_match)
+    current_user_id: str = Depends(get_current_user_id),
+    session: Session = Depends(get_session)
 ):
-    statement = select(Task).where(Task.user_id == current_user_id)
-    results = session.exec(statement)
-    return results.all()
+    tasks = get_user_tasks(session=session, user_id=current_user_id)
+    return tasks
+
+@router.post("/", response_model=Task, status_code=status.HTTP_201_CREATED)
+async def create_task_endpoint(
+    task: TaskCreate,
+    current_user_id: str = Depends(get_current_user_id),
+    session: Session = Depends(get_session)
+):
+    db_task = create_task(session=session, task_create=task, user_id=current_user_id)
+    return db_task
 
 @router.get("/{id}", response_model=Task)
 async def read_task(
-    user_id: str,
     id: UUID,
-    session: Session = Depends(get_session),
-    current_user_id: str = Depends(verify_user_match)
+    current_user_id: str = Depends(get_current_user_id),
+    session: Session = Depends(get_session)
 ):
-    task = session.get(Task, id)
-    if not task or task.user_id != current_user_id:
+    task = get_task_by_id(session=session, task_id=id, user_id=current_user_id)
+    if not task:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Task not found")
     return task
 
 @router.put("/{id}", response_model=Task)
-async def update_task(
-    user_id: str,
+async def update_task_endpoint(
     id: UUID,
     task_update: TaskUpdate,
-    session: Session = Depends(get_session),
-    current_user_id: str = Depends(verify_user_match)
+    current_user_id: str = Depends(get_current_user_id),
+    session: Session = Depends(get_session)
 ):
-    db_task = session.get(Task, id)
-    if not db_task or db_task.user_id != current_user_id:
+    updated_task = update_task(
+        session=session,
+        task_id=id,
+        task_update=task_update,
+        user_id=current_user_id
+    )
+    if not updated_task:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Task not found")
-
-    task_data = task_update.model_dump(exclude_unset=True)
-    for key, value in task_data.items():
-        setattr(db_task, key, value)
-
-    session.add(db_task)
-    session.commit()
-    session.refresh(db_task)
-    return db_task
+    return updated_task
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_task(
-    user_id: str,
+async def delete_task_endpoint(
     id: UUID,
-    session: Session = Depends(get_session),
-    current_user_id: str = Depends(verify_user_match)
+    current_user_id: str = Depends(get_current_user_id),
+    session: Session = Depends(get_session)
 ):
-    db_task = session.get(Task, id)
-    if not db_task or db_task.user_id != current_user_id:
+    success = delete_task(session=session, task_id=id, user_id=current_user_id)
+    if not success:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Task not found")
-
-    session.delete(db_task)
-    session.commit()
     return None
 
-@router.patch("/{id}/complete", response_model=Task)
-async def toggle_task_completion(
-    user_id: str,
+@router.patch("/{id}/toggle", response_model=Task)
+async def toggle_task_completion_endpoint(
     id: UUID,
-    session: Session = Depends(get_session),
-    current_user_id: str = Depends(verify_user_match)
+    current_user_id: str = Depends(get_current_user_id),
+    session: Session = Depends(get_session)
 ):
-    db_task = session.get(Task, id)
-    if not db_task or db_task.user_id != current_user_id:
+    toggled_task = toggle_task_completion(session=session, task_id=id, user_id=current_user_id)
+    if not toggled_task:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Task not found")
-
-    db_task.is_completed = not db_task.is_completed
-    session.add(db_task)
-    session.commit()
-    session.refresh(db_task)
-    return db_task
+    return toggled_task

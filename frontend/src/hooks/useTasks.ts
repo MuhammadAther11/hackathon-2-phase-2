@@ -34,7 +34,7 @@ export function useTasks() {
   const updateTask = useMutation({
     mutationFn: ({ id, ...updates }: Partial<FrontendTask> & { id: string }) =>
       apiFetch(`/tasks/${id}`, {
-        method: "PATCH",
+        method: "PUT",  // Changed to PUT to match backend
         body: JSON.stringify(updates),
       }),
     onSuccess: () => {
@@ -58,6 +58,19 @@ export function useTasks() {
     }
   });
 
+  const toggleTask = useMutation({
+    mutationFn: (id: string) =>
+      apiFetch(`/tasks/${id}/toggle`, {
+        method: "PATCH",  // Matches backend endpoint
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    },
+    onError: (err) => {
+      showToast(`Failed to toggle task: ${err.message}`, "error");
+    }
+  });
+
   return {
     tasks,
     isLoading,
@@ -65,5 +78,6 @@ export function useTasks() {
     createTask,
     updateTask,
     deleteTask,
+    toggleTask,  // Added toggle function
   };
 }

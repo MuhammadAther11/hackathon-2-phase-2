@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
 from sqlalchemy.exc import SQLAlchemyError
 from src.api.tasks import router as tasks_router
+from src.api.auth import router as auth_router
 
 app = FastAPI(title="Task Management API")
 
@@ -15,7 +16,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(tasks_router)
+app.include_router(auth_router, prefix="")
+app.include_router(tasks_router, prefix="")
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):

@@ -7,7 +7,7 @@ import { Plus, Loader2, ListChecks } from "lucide-react";
 
 export function TaskDashboard() {
   const [newTitle, setNewTitle] = useState("");
-  const { tasks, isLoading, createTask, updateTask, deleteTask } = useTasks();
+  const { tasks, isLoading, createTask, updateTask, deleteTask, toggleTask } = useTasks();  // Added toggleTask
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,7 +55,7 @@ export function TaskDashboard() {
             <TaskItem
               key={task.id}
               task={task}
-              onToggle={(id, is_completed) => updateTask.mutate({ id, is_completed })}
+              onToggle={(id) => toggleTask.mutate(id)}  // Updated to use toggleTask
               onDelete={(id) => deleteTask.mutate(id)}
             />
           ))
