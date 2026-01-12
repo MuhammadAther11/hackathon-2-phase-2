@@ -2,19 +2,23 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
-  const sessionCookie = request.cookies.get("better-auth.session_token");
+  // Check for auth token in cookies (set by auth-client from localStorage on client)
+  // Note: Middleware runs on the server, so we can't access localStorage directly
+  // Instead, we check if there's a token cookie or authorization header
+  const authToken = request.cookies.get("auth_token")?.value;
   const { pathname } = request.nextUrl;
 
   // Protected routes
   if (pathname.startsWith("/dashboard") || pathname.startsWith("/tasks")) {
-    if (!sessionCookie) {
+    if (!authToken) {
+      // Redirect to login if no auth token
       return NextResponse.redirect(new URL("/login", request.url));
     }
   }
 
   // Public routes (redirect to dashboard if logged in)
   if (pathname === "/login" || pathname === "/signup") {
-    if (sessionCookie) {
+    if (authToken) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
   }

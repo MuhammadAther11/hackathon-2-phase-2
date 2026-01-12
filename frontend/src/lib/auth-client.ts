@@ -47,7 +47,7 @@ class AuthClient {
     }
   }
 
-  // Save session to localStorage
+  // Save session to localStorage and cookie
   private saveSession(token: string, user: User) {
     this.token = token;
     this.user = user;
@@ -55,6 +55,9 @@ class AuthClient {
     if (typeof window !== "undefined") {
       localStorage.setItem("auth_token", token);
       localStorage.setItem("auth_user", JSON.stringify(user));
+
+      // Also set as cookie for server-side middleware
+      document.cookie = `auth_token=${token}; path=/; max-age=86400`;
     }
   }
 
@@ -66,6 +69,9 @@ class AuthClient {
     if (typeof window !== "undefined") {
       localStorage.removeItem("auth_token");
       localStorage.removeItem("auth_user");
+
+      // Also clear the cookie
+      document.cookie = "auth_token=; path=/; max-age=0";
     }
   }
 
