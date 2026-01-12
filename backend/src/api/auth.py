@@ -54,15 +54,24 @@ async def signup(
             detail="Password must be at least 8 characters"
         )
 
-    # Create user via service
-    user = create_user(session=session, user_create=signup_data)
-    if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Email already registered"
-        )
+    # Convert to UserCreate model
+    user_create = UserCreate(email=signup_data.email, password=signup_data.password)
 
-    return UserPublic.from_orm(user)
+    try:
+        # Create user via service
+        user = create_user(session=session, user_create=user_create)
+        if user is None:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Email already registered"
+            )
+
+        return UserPublic.from_orm(user)
+    except Exception as e:
+        print(f"Error creating user: {e}")
+        import traceback
+        traceback.print_exc()
+        raise
 
 @router.post("/login")
 async def login(
