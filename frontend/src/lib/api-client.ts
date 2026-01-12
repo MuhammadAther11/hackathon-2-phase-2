@@ -15,9 +15,16 @@ export async function apiFetch<T = unknown>(endpoint: string, options: RequestIn
     headers.set("Content-Type", "application/json");
   }
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+  // Ensure trailing slash for GET requests without query params
+  let url = `${API_BASE_URL}${endpoint}`;
+  if (!url.endsWith('/') && !endpoint.includes('?')) {
+    url += '/';
+  }
+
+  const response = await fetch(url, {
     ...options,
     headers,
+    redirect: 'follow',
   });
 
   if (!response.ok) {
