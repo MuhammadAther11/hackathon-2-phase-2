@@ -1,3 +1,4 @@
+"use client";
 import { TaskDashboard } from "@/components/TaskDashboard";
 import { NavBar } from "@/components/NavBar";
 
