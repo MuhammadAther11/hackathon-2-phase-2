@@ -11,7 +11,13 @@ app = FastAPI(title="Task Management API")
 
 @app.on_event("startup")
 def on_startup():
-    create_db_and_tables()
+    try:
+        create_db_and_tables()
+        print("✅ Database tables initialized successfully")
+    except Exception as e:
+        print(f"⚠️  Warning: Database initialization error (will retry on first request): {str(e)}")
+        import traceback
+        traceback.print_exc()
 
 app.add_middleware(
     CORSMiddleware,
@@ -44,3 +50,8 @@ async def sqlalchemy_exception_handler(request: Request, exc: SQLAlchemyError):
 @app.get("/")
 async def root():
     return {"message": "Welcome to the Task Management API"}
+
+@app.get("/health")
+async def health():
+    """Health check endpoint to verify API is running"""
+    return {"status": "ok", "service": "Task Management API"}
