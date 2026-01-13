@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { signIn, signUp } from "@/lib/auth-client";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Loader2 } from "lucide-react";
+import { Loader2, Mail, Lock, User } from "lucide-react";
 import Link from "next/link";
 import { useToast } from "@/components/ui/toast-provider";
 
@@ -17,6 +17,7 @@ export function AuthForm({ type }: AuthFormProps) {
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
   const { showToast } = useToast();
 
   const router = useRouter();
@@ -37,7 +38,8 @@ export function AuthForm({ type }: AuthFormProps) {
           password,
         });
         if (authError) throw authError;
-        router.push("/dashboard");
+        showToast("Welcome back! Redirecting to dashboard...", "success");
+        setTimeout(() => router.push("/dashboard"), 800);
       } else {
         const { error: authError } = await signUp.email({
           email,
@@ -45,113 +47,159 @@ export function AuthForm({ type }: AuthFormProps) {
           name,
         });
         if (authError) throw authError;
-        router.push("/login?message=Signup successful. Please log in.");
+        showToast("Account created! Redirecting to login...", "success");
+        setTimeout(() => router.push("/login?message=Signup successful. Please log in."), 800);
       }
     } catch (err: any) {
       const errorMessage = err?.message || err?.error || "An authentication error occurred";
       setError(errorMessage);
       showToast(errorMessage, "error");
-    } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <div className="w-full max-w-md space-y-8 bg-white p-10 rounded-xl shadow-lg border border-gray-100">
-      <div className="text-center">
-        <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-          {isLogin ? "Welcome Back" : "Create Account"}
-        </h2>
-        <p className="mt-2 text-sm text-gray-600">
-          {isLogin ? "Please enter your details to sign in" : "Join us to start managing your tasks"}
-        </p>
+  const InputField = ({ icon: Icon, label, type, placeholder, value, onChange, autoComplete }: any) => (
+    <div className="relative group mb-4 animate-fade-in-up">
+      <label htmlFor={label} className="sr-only">{label}</label>
+      <div className="relative flex items-center">
+        <Icon className={`absolute left-3 h-5 w-5 transition-colors duration-300 ${focusedField === label ? 'text-indigo-600' : 'text-gray-400'}`} />
+        <input
+          id={label}
+          type={type}
+          placeholder={placeholder}
+          value={value}
+          onChange={onChange}
+          onFocus={() => setFocusedField(label)}
+          onBlur={() => setFocusedField(null)}
+          autoComplete={autoComplete}
+          required
+          className="w-full pl-10 pr-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-lg transition-all duration-300 focus:outline-none focus:bg-white focus:border-indigo-500 hover:border-gray-300 text-gray-900 placeholder-gray-500"
+        />
       </div>
+    </div>
+  );
 
+  return (
+    <div className="w-full space-y-6 bg-white/80 backdrop-blur-xl p-8 rounded-2xl shadow-2xl border border-white/20 hover:shadow-2xl transition-shadow duration-300 animate-fade-in-up">
       {message && (
-        <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded relative text-sm text-center" role="alert">
-          {message}
+        <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg relative text-sm text-center animate-pulse-slow" role="alert">
+          <div className="flex items-center justify-center gap-2">
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            {message}
+          </div>
         </div>
       )}
 
-      <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-        <div className="rounded-md shadow-sm -space-y-px">
-          {!isLogin && (
-            <div>
-              <label htmlFor="name" className="sr-only">Name</label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Full Name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-            </div>
-          )}
-          <div>
-            <label htmlFor="email-address" className="sr-only">Email address</label>
-            <input
-              id="email-address"
-              name="email"
-              type="email"
-              autoComplete="email"
-              required
-              className={`appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 ${isLogin ? 'rounded-t-md' : ''} focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm`}
-              placeholder="Email address"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          <div>
-            <label htmlFor="password" className="sr-only">Password</label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              required
-              className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-        </div>
+      <form className="space-y-4" onSubmit={handleSubmit}>
+        {!isLogin && (
+          <InputField
+            icon={User}
+            label="Full Name"
+            type="text"
+            placeholder="Enter your full name"
+            value={name}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
+            autoComplete="name"
+          />
+        )}
+
+        <InputField
+          icon={Mail}
+          label="Email"
+          type="email"
+          placeholder="you@example.com"
+          value={email}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+          autoComplete="email"
+        />
+
+        <InputField
+          icon={Lock}
+          label="Password"
+          type="password"
+          placeholder="••••••••"
+          value={password}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
+          autoComplete="current-password"
+        />
 
         {error && (
-          <div className="text-red-500 text-sm text-center font-medium bg-red-50 p-2 rounded border border-red-100">
+          <div className="text-red-600 text-sm font-medium bg-red-50 p-3 rounded-lg border border-red-200 flex items-center gap-2 animate-shake">
+            <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+            </svg>
             {error}
           </div>
         )}
 
-        <div>
-          <button
-            type="submit"
-            disabled={loading}
-            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 transition-all duration-200"
-          >
-            {loading ? (
-              <Loader2 className="animate-spin h-5 w-5 text-white" />
-            ) : (
-              isLogin ? "Sign in" : "Sign up"
-            )}
-          </button>
-        </div>
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full py-3 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2 mt-6 animate-fade-in-up group"
+        >
+          {loading ? (
+            <>
+              <Loader2 className="animate-spin h-5 w-5" />
+              <span>{isLogin ? "Signing in..." : "Creating account..."}</span>
+            </>
+          ) : (
+            <>
+              <span>{isLogin ? "Sign in" : "Create account"}</span>
+              <svg className="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </>
+          )}
+        </button>
       </form>
 
-      <div className="text-center mt-4 text-sm">
-        <span className="text-gray-600">
-          {isLogin ? "New here?" : "Already have an account?"}{" "}
-        </span>
-        <Link
-          href={isLogin ? "/signup" : "/login"}
-          className="font-medium text-indigo-600 hover:text-indigo-500"
-        >
-          {isLogin ? "Create an account" : "Sign in instead"}
-        </Link>
+      <div className="pt-4 border-t border-gray-200">
+        <p className="text-center text-gray-600 text-sm">
+          {isLogin ? "Don't have an account? " : "Already have an account? "}
+          <Link
+            href={isLogin ? "/signup" : "/login"}
+            className="font-semibold text-indigo-600 hover:text-indigo-700 transition-colors duration-200 inline-flex items-center gap-1"
+          >
+            {isLogin ? "Sign up" : "Sign in"}
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </Link>
+        </p>
       </div>
+
+      <style jsx>{`
+        @keyframes fade-in-up {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          25% { transform: translateX(-5px); }
+          75% { transform: translateX(5px); }
+        }
+        @keyframes pulse-slow {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.8; }
+        }
+        .animate-fade-in-up {
+          animation: fade-in-up 0.5s ease-out forwards;
+        }
+        .animate-shake {
+          animation: shake 0.5s ease-in-out;
+        }
+        .animate-pulse-slow {
+          animation: pulse-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+      `}</style>
     </div>
   );
 }
