@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { signIn, signUp } from "@/lib/auth-client";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2, Mail, Lock, User } from "lucide-react";
@@ -20,11 +20,32 @@ export function AuthForm({ type }: AuthFormProps) {
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const { showToast } = useToast();
 
+  const nameInputRef = useRef<HTMLInputElement>(null);
+  const emailInputRef = useRef<HTMLInputElement>(null);
+  const passwordInputRef = useRef<HTMLInputElement>(null);
+  const submitButtonRef = useRef<HTMLButtonElement>(null);
+
   const router = useRouter();
   const searchParams = useSearchParams();
   const message = searchParams.get("message");
 
   const isLogin = type === "login";
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const currentInput = e.currentTarget;
+
+      // Determine the order of fields based on form type
+      if (!isLogin && currentInput === nameInputRef.current) {
+        emailInputRef.current?.focus();
+      } else if (currentInput === emailInputRef.current) {
+        passwordInputRef.current?.focus();
+      } else if (currentInput === passwordInputRef.current) {
+        submitButtonRef.current?.focus();
+      }
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,17 +79,19 @@ export function AuthForm({ type }: AuthFormProps) {
     }
   };
 
-  const InputField = ({ icon: Icon, label, type, placeholder, value, onChange, autoComplete }: any) => (
+  const InputField = ({ icon: Icon, label, type, placeholder, value, onChange, autoComplete, inputRef, onKeyDown }: any) => (
     <div className="relative group mb-4 animate-fade-in-up">
       <label htmlFor={label} className="sr-only">{label}</label>
       <div className="relative flex items-center">
         <Icon className={`absolute left-3 h-5 w-5 transition-colors duration-300 ${focusedField === label ? 'text-indigo-600' : 'text-gray-400'}`} />
         <input
+          ref={inputRef}
           id={label}
           type={type}
           placeholder={placeholder}
           value={value}
           onChange={onChange}
+          onKeyDown={onKeyDown}
           onFocus={() => setFocusedField(label)}
           onBlur={() => setFocusedField(null)}
           autoComplete={autoComplete}
@@ -102,6 +125,8 @@ export function AuthForm({ type }: AuthFormProps) {
             value={name}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
             autoComplete="name"
+            inputRef={nameInputRef}
+            onKeyDown={handleKeyDown}
           />
         )}
 
@@ -113,6 +138,8 @@ export function AuthForm({ type }: AuthFormProps) {
           value={email}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
           autoComplete="email"
+          inputRef={emailInputRef}
+          onKeyDown={handleKeyDown}
         />
 
         <InputField
@@ -123,6 +150,8 @@ export function AuthForm({ type }: AuthFormProps) {
           value={password}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
           autoComplete="current-password"
+          inputRef={passwordInputRef}
+          onKeyDown={handleKeyDown}
         />
 
         {error && (
@@ -135,6 +164,7 @@ export function AuthForm({ type }: AuthFormProps) {
         )}
 
         <button
+          ref={submitButtonRef}
           type="submit"
           disabled={loading}
           className="w-full py-3 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2 mt-6 animate-fade-in-up group"
