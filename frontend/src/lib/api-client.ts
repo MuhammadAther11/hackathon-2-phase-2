@@ -1,4 +1,5 @@
 import { authClient } from "./auth-client";
+import { getNetworkErrorMessage } from "./auth-errors";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -21,37 +22,57 @@ export async function apiFetch<T = unknown>(endpoint: string, options: RequestIn
     url += '/';
   }
 
-  const response = await fetch(url, {
-    ...options,
-    headers,
-    redirect: 'follow',
-  });
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers,
+      redirect: 'follow',
+    });
 
-  if (!response.ok) {
-    if (response.status === 401) {
-      // Logic for 401: redirect to login if we're on the client
-      if (typeof window !== "undefined") {
-        window.location.href = "/login?message=Session expired. Please log in again.";
-        // Also clear the session
-        authClient.signOut();
+    if (!response.ok) {
+      if (response.status === 401) {
+        // Logic for 401: redirect to login if we're on the client
+        if (typeof window !== "undefined") {
+          window.location.href = "/login?message=Session expired. Please log in again.";
+          // Also clear the session
+          authClient.signOut();
+        }
       }
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = errorData.detail || `API request failed: ${response.status} ${response.statusText}`;
+
+      const error = new Error(errorMessage) as any;
+      error.status = response.status;
+      error.detail = errorData.detail;
+      throw error;
     }
-    const errorData = await response.json().catch(() => ({}));
-    const errorMessage = errorData.detail || `API request failed: ${response.status} ${response.statusText}`;
 
-    throw new Error(errorMessage);
+    // Handle 204 No Content responses (no body)
+    if (response.status === 204) {
+      return null as any;
+    }
+
+    // Handle empty responses
+    const contentLength = response.headers.get('content-length');
+    if (contentLength === '0') {
+      return null as any;
+    }
+
+    return response.json();
+  } catch (err: any) {
+    // Handle network errors (no internet, timeouts, etc.)
+    if (err instanceof TypeError && err.message.includes('Failed to fetch')) {
+      const networkError = new Error(getNetworkErrorMessage(err)) as any;
+      networkError.status = 0;
+      throw networkError;
+    }
+
+    // If it's already our error with status, re-throw it
+    if (err.status) {
+      throw err;
+    }
+
+    // Generic error handling
+    throw err;
   }
-
-  // Handle 204 No Content responses (no body)
-  if (response.status === 204) {
-    return null as any;
-  }
-
-  // Handle empty responses
-  const contentLength = response.headers.get('content-length');
-  if (contentLength === '0') {
-    return null as any;
-  }
-
-  return response.json();
 }
