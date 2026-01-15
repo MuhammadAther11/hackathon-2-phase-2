@@ -42,5 +42,16 @@ export async function apiFetch<T = unknown>(endpoint: string, options: RequestIn
     throw new Error(errorMessage);
   }
 
+  // Handle 204 No Content responses (no body)
+  if (response.status === 204) {
+    return null as any;
+  }
+
+  // Handle empty responses
+  const contentLength = response.headers.get('content-length');
+  if (contentLength === '0') {
+    return null as any;
+  }
+
   return response.json();
 }
