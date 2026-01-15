@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api-client";
 import { FrontendTask } from "@/types";
 import { useToast } from "@/components/ui/toast-provider";
+import { formatTaskError } from "@/lib/task-errors";
 
 export function useTasks() {
   const queryClient = useQueryClient();
@@ -12,10 +13,13 @@ export function useTasks() {
   const { data: tasks = [], isLoading, error } = useQuery<FrontendTask[]>({
     queryKey: ["tasks"],
     queryFn: () => apiFetch<FrontendTask[]>("/tasks"),
-    onError: (err) => {
-      showToast(`Failed to load tasks: ${err.message}`, "error");
-    }
+    retry: 3,
   });
+
+  // Show error toast when tasks query fails
+  if (error) {
+    showToast(formatTaskError(error, "load"), "error");
+  }
 
   const createTask = useMutation({
     mutationFn: (title: string) =>
@@ -25,23 +29,25 @@ export function useTasks() {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      showToast("Task created successfully", "success");
     },
-    onError: (err) => {
-      showToast(`Failed to create task: ${err.message}`, "error");
+    onError: (err: any) => {
+      showToast(formatTaskError(err, "create"), "error");
     }
   });
 
   const updateTask = useMutation({
     mutationFn: ({ id, ...updates }: Partial<FrontendTask> & { id: string }) =>
       apiFetch(`/tasks/${id}`, {
-        method: "PUT",  // Changed to PUT to match backend
+        method: "PUT",
         body: JSON.stringify(updates),
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      showToast("Task updated successfully", "success");
     },
-    onError: (err) => {
-      showToast(`Failed to update task: ${err.message}`, "error");
+    onError: (err: any) => {
+      showToast(formatTaskError(err, "update"), "error");
     }
   });
 
@@ -52,22 +58,24 @@ export function useTasks() {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      showToast("Task deleted successfully", "success");
     },
-    onError: (err) => {
-      showToast(`Failed to delete task: ${err.message}`, "error");
+    onError: (err: any) => {
+      showToast(formatTaskError(err, "delete"), "error");
     }
   });
 
   const toggleTask = useMutation({
     mutationFn: (id: string) =>
       apiFetch(`/tasks/${id}/toggle`, {
-        method: "PATCH",  // Matches backend endpoint
+        method: "PATCH",
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      showToast("Task status updated", "success");
     },
-    onError: (err) => {
-      showToast(`Failed to toggle task: ${err.message}`, "error");
+    onError: (err: any) => {
+      showToast(formatTaskError(err, "toggle"), "error");
     }
   });
 
