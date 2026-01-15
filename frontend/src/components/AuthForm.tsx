@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2, Mail, Lock, User } from "lucide-react";
 import Link from "next/link";
 import { useToast } from "@/components/ui/toast-provider";
+import { getAuthErrorMessage } from "@/lib/auth-errors";
 
 interface AuthFormProps {
   type: "login" | "signup";
@@ -31,21 +32,8 @@ export function AuthForm({ type }: AuthFormProps) {
 
   const isLogin = type === "login";
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      const currentInput = e.currentTarget;
-
-      // Determine the order of fields based on form type
-      if (!isLogin && currentInput === nameInputRef.current) {
-        emailInputRef.current?.focus();
-      } else if (currentInput === emailInputRef.current) {
-        passwordInputRef.current?.focus();
-      } else if (currentInput === passwordInputRef.current) {
-        submitButtonRef.current?.focus();
-      }
-    }
-  };
+  // Removed custom keyboard navigation - use standard form behavior
+  // Tab key and Enter on password field now work naturally
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,14 +60,14 @@ export function AuthForm({ type }: AuthFormProps) {
         setTimeout(() => router.push("/login?message=Signup successful. Please log in."), 800);
       }
     } catch (err: any) {
-      const errorMessage = err?.message || err?.error || "An authentication error occurred";
+      const errorMessage = getAuthErrorMessage(err);
       setError(errorMessage);
       showToast(errorMessage, "error");
       setLoading(false);
     }
   };
 
-  const InputField = ({ icon: Icon, label, type, placeholder, value, onChange, autoComplete, inputRef, onKeyDown }: any) => (
+  const InputField = ({ icon: Icon, label, type, placeholder, value, onChange, autoComplete, inputRef }: any) => (
     <div className="relative group mb-4 animate-fade-in-up">
       <label htmlFor={label} className="sr-only">{label}</label>
       <div className="relative flex items-center">
@@ -91,7 +79,6 @@ export function AuthForm({ type }: AuthFormProps) {
           placeholder={placeholder}
           value={value}
           onChange={onChange}
-          onKeyDown={onKeyDown}
           onFocus={() => setFocusedField(label)}
           onBlur={() => setFocusedField(null)}
           autoComplete={autoComplete}
@@ -126,7 +113,6 @@ export function AuthForm({ type }: AuthFormProps) {
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
             autoComplete="name"
             inputRef={nameInputRef}
-            onKeyDown={handleKeyDown}
           />
         )}
 
@@ -139,7 +125,6 @@ export function AuthForm({ type }: AuthFormProps) {
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
           autoComplete="email"
           inputRef={emailInputRef}
-          onKeyDown={handleKeyDown}
         />
 
         <InputField
@@ -151,7 +136,6 @@ export function AuthForm({ type }: AuthFormProps) {
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
           autoComplete="current-password"
           inputRef={passwordInputRef}
-          onKeyDown={handleKeyDown}
         />
 
         {error && (

@@ -6,7 +6,7 @@ import { LogOut, CheckSquare, User } from "lucide-react";
 import Link from "next/link";
 
 export function NavBar() {
-  const { data: session, isPending } = useSession();
+  const { data: session, isLoading } = useSession();
   const router = useRouter();
 
   const handleSignOut = async () => {
@@ -26,11 +26,11 @@ export function NavBar() {
           </div>
 
           <div className="flex items-center space-x-4">
-            {!isPending && session ? (
+            {!isLoading && session ? (
               <>
                 <div className="hidden sm:flex items-center space-x-2 text-sm text-gray-700">
                   <User className="h-4 w-4" />
-                  <span>{session.user.name || session.user.email}</span>
+                  <span>{session.user.email}</span>
                 </div>
                 <button
                   onClick={handleSignOut}
