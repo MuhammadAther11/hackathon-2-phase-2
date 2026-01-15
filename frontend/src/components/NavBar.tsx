@@ -18,11 +18,27 @@ export function NavBar() {
     <nav className="bg-white border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
-          <div className="flex items-center">
+          <div className="flex items-center space-x-8">
             <Link href="/dashboard" className="flex items-center space-x-2">
               <CheckSquare className="h-8 w-8 text-indigo-600" />
               <span className="text-xl font-bold text-gray-900">TaskFlow</span>
             </Link>
+            {!isPending && session && (
+              <div className="hidden md:flex items-center space-x-6">
+                <Link
+                  href="/dashboard"
+                  className="text-sm font-medium text-gray-700 hover:text-indigo-600 transition-colors"
+                >
+                  Dashboard
+                </Link>
+                <Link
+                  href="/feed"
+                  className="text-sm font-medium text-gray-700 hover:text-indigo-600 transition-colors"
+                >
+                  Feed
+                </Link>
+              </div>
+            )}
           </div>
 
           <div className="flex items-center space-x-4">
