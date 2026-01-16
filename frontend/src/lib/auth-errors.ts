@@ -3,13 +3,21 @@
  * Maps HTTP status codes and error details to user-friendly messages
  */
 
-interface ErrorResponse {
+interface ErrorObject {
   status?: number;
+  response?: { status?: number; data?: { detail?: string } };
   detail?: string;
   message?: string;
 }
 
-export function getAuthErrorMessage(error: any): string {
+function isErrorObject(error: unknown): error is ErrorObject {
+  return typeof error === "object" && error !== null;
+}
+
+export function getAuthErrorMessage(error: unknown): string {
+  if (!isErrorObject(error)) {
+    return String(error);
+  }
   const status = error?.status || error?.response?.status;
   const detail = error?.detail || error?.response?.data?.detail || error?.message || "";
 
@@ -61,7 +69,7 @@ function mapValidationError(detail: string): string {
   return "Invalid data. Please check your entries.";
 }
 
-function mapErrorDetail(detail: any): string {
+function mapErrorDetail(detail: unknown): string {
   if (!detail) return "";
 
   const detailStr = String(detail).toLowerCase();
@@ -85,8 +93,15 @@ function mapErrorDetail(detail: any): string {
 /**
  * Handle network errors (timeouts, connection issues)
  */
-export function getNetworkErrorMessage(error: any): string {
-  const message = String(error?.message || error || "").toLowerCase();
+export function getNetworkErrorMessage(error: unknown): string {
+  let message = "";
+  if (isErrorObject(error) && error.message) {
+    message = String(error.message).toLowerCase();
+  } else if (error instanceof Error) {
+    message = error.message.toLowerCase();
+  } else {
+    message = String(error || "").toLowerCase();
+  }
 
   if (message.includes("network") || message.includes("fetch")) {
     return "Connection lost. Check your internet.";

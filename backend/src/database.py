@@ -47,14 +47,14 @@ def create_db_and_tables():
     for attempt in range(max_retries):
         try:
             SQLModel.metadata.create_all(engine)
-            print(f"✅ Database tables created successfully on attempt {attempt + 1}")
+            print(f"Database tables created successfully on attempt {attempt + 1}")
             return
         except Exception as e:
             if attempt < max_retries - 1:
-                print(f"⚠️  Database connection attempt {attempt + 1} failed: {str(e)}")
+                print(f"Database connection attempt {attempt + 1} failed: {str(e)}")
                 time.sleep(2 ** attempt)  # Exponential backoff
             else:
-                print(f"❌ Failed to create database tables after {max_retries} attempts")
+                print(f"Failed to create database tables after {max_retries} attempts")
                 raise
 
 def get_session():

@@ -13,9 +13,9 @@ app = FastAPI(title="Task Management API")
 def on_startup():
     try:
         create_db_and_tables()
-        print("✅ Database tables initialized successfully")
+        print("Database tables initialized successfully")
     except Exception as e:
-        print(f"⚠️  Warning: Database initialization error (will retry on first request): {str(e)}")
+        print(f"Warning: Database initialization error (will retry on first request): {str(e)}")
         import traceback
         traceback.print_exc()
 

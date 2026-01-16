@@ -3,7 +3,21 @@
  * Maps HTTP status codes and error details to user-friendly messages for task CRUD operations
  */
 
-export function getTaskErrorMessage(error: any): string {
+interface TaskErrorObject {
+  status?: number;
+  response?: { status?: number; data?: { detail?: string } };
+  detail?: string;
+  message?: string;
+}
+
+function isTaskErrorObject(error: unknown): error is TaskErrorObject {
+  return typeof error === "object" && error !== null;
+}
+
+export function getTaskErrorMessage(error: unknown): string {
+  if (!isTaskErrorObject(error)) {
+    return String(error);
+  }
   const status = error?.status || error?.response?.status;
   const detail = error?.detail || error?.response?.data?.detail || error?.message || "";
 
@@ -37,7 +51,7 @@ export function getTaskErrorMessage(error: any): string {
   }
 }
 
-function mapTaskValidationError(detail: any): string {
+function mapTaskValidationError(detail: unknown): string {
   if (!detail) return "";
 
   const detailStr = String(detail).toLowerCase();
@@ -61,7 +75,7 @@ function mapTaskValidationError(detail: any): string {
   return String(detail);
 }
 
-function mapTaskErrorDetail(detail: any): string {
+function mapTaskErrorDetail(detail: unknown): string {
   if (!detail) return "";
 
   const detailStr = String(detail).toLowerCase();
@@ -85,8 +99,8 @@ function mapTaskErrorDetail(detail: any): string {
 /**
  * Format error messages for display
  */
-export function formatTaskError(error: any, context?: string): string {
-  let message = getTaskErrorMessage(error);
+export function formatTaskError(error: unknown, context?: string): string {
+  const message = getTaskErrorMessage(error);
 
   if (context === "create") {
     return `Failed to create task: ${message}`;

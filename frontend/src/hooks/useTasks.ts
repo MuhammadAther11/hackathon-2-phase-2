@@ -31,7 +31,7 @@ export function useTasks() {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       showToast("Task created successfully", "success");
     },
-    onError: (err: any) => {
+    onError: (err: unknown) => {
       showToast(formatTaskError(err, "create"), "error");
     }
   });
@@ -46,7 +46,7 @@ export function useTasks() {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       showToast("Task updated successfully", "success");
     },
-    onError: (err: any) => {
+    onError: (err: unknown) => {
       showToast(formatTaskError(err, "update"), "error");
     }
   });
@@ -60,7 +60,7 @@ export function useTasks() {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       showToast("Task deleted successfully", "success");
     },
-    onError: (err: any) => {
+    onError: (err: unknown) => {
       showToast(formatTaskError(err, "delete"), "error");
     }
   });
@@ -74,7 +74,7 @@ export function useTasks() {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       showToast("Task status updated", "success");
     },
-    onError: (err: any) => {
+    onError: (err: unknown) => {
       showToast(formatTaskError(err, "toggle"), "error");
     }
   });

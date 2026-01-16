@@ -7,7 +7,7 @@ import { Plus, Loader2, ListChecks } from "lucide-react";
 
 export function TaskDashboard() {
   const [newTitle, setNewTitle] = useState("");
-  const { tasks, isLoading, createTask, updateTask, deleteTask, toggleTask } = useTasks();  // Added toggleTask
+  const { tasks, isLoading, createTask, deleteTask, toggleTask } = useTasks();
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
