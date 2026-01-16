@@ -26,6 +26,12 @@ interface Session {
   token: string;
 }
 
+interface Credentials {
+  email: string;
+  password: string;
+  name?: string;
+}
+
 // API base URL
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
 
@@ -93,8 +99,9 @@ class AuthClient {
 
       const data: SignupResponse = await response.json();
       return { user: data, error: null };
-    } catch (error: any) {
-      return { user: null, error: { message: error.message } };
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      return { user: null, error: { message } };
     }
   }
 
@@ -120,8 +127,9 @@ class AuthClient {
       this.saveSession(data.access_token, data.user);
 
       return { session: { user: data.user, token: data.access_token }, error: null };
-    } catch (error: any) {
-      return { session: null, error: { message: error.message } };
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      return { session: null, error: { message } };
     }
   }
 
@@ -141,8 +149,9 @@ class AuthClient {
       }).catch(() => {}); // Ignore logout API errors
 
       return { error: null };
-    } catch (error: any) {
-      return { error: { message: error.message } };
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      return { error: { message } };
     }
   }
 
@@ -165,7 +174,7 @@ export const authClient = new AuthClient();
 
 // Export convenience functions
 export const signUp = {
-  email: (credentials: { email: string; password: string }) => authClient.signUp(credentials)
+  email: (credentials: { email: string; password: string; name?: string }) => authClient.signUp(credentials as Credentials)
 };
 
 export const signIn = {

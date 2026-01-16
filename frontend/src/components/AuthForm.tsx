@@ -1,15 +1,96 @@
 "use client";
 
-import { useState, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { signIn, signUp } from "@/lib/auth-client";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Loader2, Mail, Lock, User } from "lucide-react";
+import { Loader2, Mail, Lock, User, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useToast } from "@/components/ui/toast-provider";
+import { getAuthErrorMessage } from "@/lib/auth-errors";
 
 interface AuthFormProps {
   type: "login" | "signup";
 }
+
+interface InputFieldProps {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  type: string;
+  placeholder: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  autoComplete: string;
+  inputRef: React.RefObject<HTMLInputElement | null>;
+  focusedField: string | null;
+  onFocus: () => void;
+  onBlur: () => void;
+}
+
+const InputField = React.memo(({ icon: Icon, label, type, placeholder, value, onChange, autoComplete, inputRef, focusedField, onFocus, onBlur }: InputFieldProps) => (
+  <div className="relative group mb-4 animate-fade-in-up">
+    <label htmlFor={label} className="sr-only">{label}</label>
+    <div className="relative flex items-center">
+      <Icon className={`absolute left-3 h-5 w-5 transition-colors duration-300 ${focusedField === label ? 'text-indigo-600' : 'text-gray-400'}`} />
+      <input
+        ref={inputRef}
+        id={label}
+        type={type}
+        placeholder={placeholder}
+        value={value}
+        onChange={onChange}
+        onFocus={onFocus}
+        onBlur={onBlur}
+        autoComplete={autoComplete}
+        required
+        className="w-full pl-10 pr-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-lg transition-all duration-300 focus:outline-none focus:bg-white focus:border-indigo-500 hover:border-gray-300 text-gray-900 placeholder-gray-500"
+      />
+    </div>
+  </div>
+));
+
+interface PasswordFieldProps {
+  label: string;
+  placeholder: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  autoComplete: string;
+  inputRef: React.RefObject<HTMLInputElement | null>;
+  focusedField: string | null;
+  onFocus: () => void;
+  onBlur: () => void;
+  showPassword: boolean;
+  onToggleShowPassword: () => void;
+}
+
+const PasswordField = React.memo(({ label, placeholder, value, onChange, autoComplete, inputRef, focusedField, onFocus, onBlur, showPassword, onToggleShowPassword }: PasswordFieldProps) => (
+  <div className="relative group mb-4 animate-fade-in-up">
+    <label htmlFor={label} className="sr-only">{label}</label>
+    <div className="relative flex items-center">
+      <Lock className={`absolute left-3 h-5 w-5 transition-colors duration-300 ${focusedField === label ? 'text-indigo-600' : 'text-gray-400'}`} />
+      <input
+        ref={inputRef}
+        id={label}
+        type={showPassword ? "text" : "password"}
+        placeholder={placeholder}
+        value={value}
+        onChange={onChange}
+        onFocus={onFocus}
+        onBlur={onBlur}
+        autoComplete={autoComplete}
+        required
+        className="w-full pl-10 pr-12 py-3 bg-gray-50 border-2 border-gray-200 rounded-lg transition-all duration-300 focus:outline-none focus:bg-white focus:border-indigo-500 hover:border-gray-300 text-gray-900 placeholder-gray-500"
+      />
+      <button
+        type="button"
+        onClick={onToggleShowPassword}
+        className="absolute right-3 text-gray-400 hover:text-gray-600 focus:outline-none transition-colors duration-300"
+        aria-label={showPassword ? "Hide password" : "Show password"}
+      >
+        {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+      </button>
+    </div>
+  </div>
+));
 
 export function AuthForm({ type }: AuthFormProps) {
   const [email, setEmail] = useState("");
@@ -18,6 +99,7 @@ export function AuthForm({ type }: AuthFormProps) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const { showToast } = useToast();
 
   const nameInputRef = useRef<HTMLInputElement>(null);
@@ -31,21 +113,8 @@ export function AuthForm({ type }: AuthFormProps) {
 
   const isLogin = type === "login";
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      const currentInput = e.currentTarget;
-
-      // Determine the order of fields based on form type
-      if (!isLogin && currentInput === nameInputRef.current) {
-        emailInputRef.current?.focus();
-      } else if (currentInput === emailInputRef.current) {
-        passwordInputRef.current?.focus();
-      } else if (currentInput === passwordInputRef.current) {
-        submitButtonRef.current?.focus();
-      }
-    }
-  };
+  // Removed custom keyboard navigation - use standard form behavior
+  // Tab key and Enter on password field now work naturally
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,36 +140,21 @@ export function AuthForm({ type }: AuthFormProps) {
         showToast("Account created! Redirecting to login...", "success");
         setTimeout(() => router.push("/login?message=Signup successful. Please log in."), 800);
       }
-    } catch (err: any) {
-      const errorMessage = err?.message || err?.error || "An authentication error occurred";
+    } catch (err: unknown) {
+      const errorMessage = getAuthErrorMessage(err);
       setError(errorMessage);
       showToast(errorMessage, "error");
       setLoading(false);
     }
   };
 
-  const InputField = ({ icon: Icon, label, type, placeholder, value, onChange, autoComplete, inputRef, onKeyDown }: any) => (
-    <div className="relative group mb-4 animate-fade-in-up">
-      <label htmlFor={label} className="sr-only">{label}</label>
-      <div className="relative flex items-center">
-        <Icon className={`absolute left-3 h-5 w-5 transition-colors duration-300 ${focusedField === label ? 'text-indigo-600' : 'text-gray-400'}`} />
-        <input
-          ref={inputRef}
-          id={label}
-          type={type}
-          placeholder={placeholder}
-          value={value}
-          onChange={onChange}
-          onKeyDown={onKeyDown}
-          onFocus={() => setFocusedField(label)}
-          onBlur={() => setFocusedField(null)}
-          autoComplete={autoComplete}
-          required
-          className="w-full pl-10 pr-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-lg transition-all duration-300 focus:outline-none focus:bg-white focus:border-indigo-500 hover:border-gray-300 text-gray-900 placeholder-gray-500"
-        />
-      </div>
-    </div>
-  );
+  const handleFocus = (label: string) => {
+    setFocusedField(label);
+  };
+
+  const handleBlur = () => {
+    setFocusedField(null);
+  };
 
   return (
     <div className="w-full space-y-6 bg-white/80 backdrop-blur-xl p-8 rounded-2xl shadow-2xl border border-white/20 hover:shadow-2xl transition-shadow duration-300 animate-fade-in-up">
@@ -126,7 +180,9 @@ export function AuthForm({ type }: AuthFormProps) {
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
             autoComplete="name"
             inputRef={nameInputRef}
-            onKeyDown={handleKeyDown}
+            focusedField={focusedField}
+            onFocus={() => handleFocus("Full Name")}
+            onBlur={handleBlur}
           />
         )}
 
@@ -139,19 +195,23 @@ export function AuthForm({ type }: AuthFormProps) {
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
           autoComplete="email"
           inputRef={emailInputRef}
-          onKeyDown={handleKeyDown}
+          focusedField={focusedField}
+          onFocus={() => handleFocus("Email")}
+          onBlur={handleBlur}
         />
 
-        <InputField
-          icon={Lock}
+        <PasswordField
           label="Password"
-          type="password"
           placeholder="••••••••"
           value={password}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
           autoComplete="current-password"
           inputRef={passwordInputRef}
-          onKeyDown={handleKeyDown}
+          focusedField={focusedField}
+          onFocus={() => handleFocus("Password")}
+          onBlur={handleBlur}
+          showPassword={showPassword}
+          onToggleShowPassword={() => setShowPassword(!showPassword)}
         />
 
         {error && (

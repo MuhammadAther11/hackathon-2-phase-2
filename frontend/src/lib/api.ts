@@ -3,8 +3,8 @@ import { authClient } from "./auth-client";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export async function apiFetch(endpoint: string, options: RequestInit = {}) {
-    const session = await authClient.getSession();
-    const token = session?.data?.token || session?.data?.session?.idToken;
+    const session = authClient.getSession();
+    const token = session?.data?.token;
 
     // Better Auth JWT plugin usually puts the token in the session object if configured
     // Since we are using HS256 symmetric JWT plugin, it should be available.

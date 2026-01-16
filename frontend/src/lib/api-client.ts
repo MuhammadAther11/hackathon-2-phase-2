@@ -1,6 +1,20 @@
 import { authClient } from "./auth-client";
+import { getNetworkErrorMessage } from "./auth-errors";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+// Custom error class that supports additional properties
+class APIError extends Error {
+  status: number;
+  detail: unknown;
+
+  constructor(message: string, status: number, detail?: unknown) {
+    super(message);
+    this.name = "APIError";
+    this.status = status;
+    this.detail = detail;
+  }
+}
 
 export async function apiFetch<T = unknown>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const session = authClient.getSession();
@@ -21,26 +35,53 @@ export async function apiFetch<T = unknown>(endpoint: string, options: RequestIn
     url += '/';
   }
 
-  const response = await fetch(url, {
-    ...options,
-    headers,
-    redirect: 'follow',
-  });
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers,
+      redirect: 'follow',
+    });
 
-  if (!response.ok) {
-    if (response.status === 401) {
-      // Logic for 401: redirect to login if we're on the client
-      if (typeof window !== "undefined") {
-        window.location.href = "/login?message=Session expired. Please log in again.";
-        // Also clear the session
-        authClient.signOut();
+    if (!response.ok) {
+      if (response.status === 401) {
+        // Logic for 401: redirect to login if we're on the client
+        if (typeof window !== "undefined") {
+          window.location.href = "/login?message=Session expired. Please log in again.";
+          // Also clear the session
+          authClient.signOut();
+        }
       }
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = (errorData as Record<string, unknown>)?.detail || `API request failed: ${response.status} ${response.statusText}`;
+
+      throw new APIError(String(errorMessage), response.status, (errorData as Record<string, unknown>)?.detail);
     }
-    const errorData = await response.json().catch(() => ({}));
-    const errorMessage = errorData.detail || `API request failed: ${response.status} ${response.statusText}`;
 
-    throw new Error(errorMessage);
+    // Handle 204 No Content responses (no body)
+    if (response.status === 204) {
+      return null as T;
+    }
+
+    // Handle empty responses
+    const contentLength = response.headers.get('content-length');
+    if (contentLength === '0') {
+      return null as T;
+    }
+
+    const json = await response.json();
+    return json as T;
+  } catch (err: unknown) {
+    // Handle network errors (no internet, timeouts, etc.)
+    if (err instanceof TypeError && err.message.includes('Failed to fetch')) {
+      throw new APIError(getNetworkErrorMessage(err), 0);
+    }
+
+    // If it's already our error with status, re-throw it
+    if (err instanceof APIError) {
+      throw err;
+    }
+
+    // Generic error handling
+    throw err;
   }
-
-  return response.json();
 }
