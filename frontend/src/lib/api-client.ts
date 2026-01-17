@@ -1,7 +1,7 @@
 import { authClient } from "./auth-client";
 import { getNetworkErrorMessage } from "./auth-errors";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_URL = "https://atherali11-deploy-phase-2.hf.space";
 
 // Custom error class that supports additional properties
 class APIError extends Error {
