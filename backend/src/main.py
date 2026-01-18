@@ -28,7 +28,7 @@ app.add_middleware(
 )
 
 app.include_router(auth_router, prefix="")
-app.include_router(tasks_router, prefix="")
+app.include_router(tasks_router, prefix="/api")
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
