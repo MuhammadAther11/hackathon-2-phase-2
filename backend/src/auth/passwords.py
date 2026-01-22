@@ -1,11 +1,11 @@
 from passlib.context import CryptContext
 import hashlib
 
-# Use argon2 as primary scheme for better compatibility, bcrypt as backup
+# Use bcrypt as primary scheme for better compatibility across environments
 pwd_context = CryptContext(
-    schemes=["argon2"],
+    schemes=["bcrypt"],
     deprecated="auto",
-    argon2__memory_cost=65536,
+    bcrypt__rounds=12,
 )
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -19,7 +19,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 def get_password_hash(password: str) -> str:
     """Hash a plain password."""
     try:
-        # Truncate to 72 bytes for bcrypt compatibility just in case
+        # Truncate to 72 bytes for bcrypt compatibility
         password_to_hash = password[:72] if len(password.encode()) > 72 else password
         return pwd_context.hash(password_to_hash)
     except Exception as e:
