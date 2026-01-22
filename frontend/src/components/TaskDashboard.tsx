@@ -7,13 +7,18 @@ import { Plus, Loader2, ListChecks } from "lucide-react";
 
 export function TaskDashboard() {
   const [newTitle, setNewTitle] = useState("");
-  const { tasks, isLoading, createTask, deleteTask, toggleTask } = useTasks();
+  const [newDescription, setNewDescription] = useState("");
+  const { tasks, isLoading, createTask, updateTask, deleteTask, toggleTask } = useTasks();
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle.trim()) return;
-    await createTask.mutateAsync(newTitle);
+    await createTask.mutateAsync({
+      title: newTitle.trim(),
+      description: newDescription.trim() || undefined,
+    });
     setNewTitle("");
+    setNewDescription("");
   };
 
   if (isLoading) {
@@ -27,24 +32,51 @@ export function TaskDashboard() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-8 px-4 sm:px-0">
-      <form onSubmit={handleCreate} className="relative group">
-        <input
-          type="text"
-          placeholder="What needs to be done?"
-          className="w-full pl-4 pr-12 py-4 bg-white border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
-          value={newTitle}
-          onChange={(e) => setNewTitle(e.target.value)}
-          disabled={createTask.isPending}
-        />
+      <form onSubmit={handleCreate} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Task Title
+          </label>
+          <input
+            type="text"
+            placeholder="Enter task title"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+            value={newTitle}
+            onChange={(e) => setNewTitle(e.target.value)}
+            disabled={createTask.isPending}
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Task Description (Optional)
+          </label>
+          <textarea
+            placeholder="Enter task description"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all resize-none"
+            rows={3}
+            value={newDescription}
+            onChange={(e) => setNewDescription(e.target.value)}
+            disabled={createTask.isPending}
+          />
+        </div>
+
         <button
           type="submit"
-          className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+          className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
           disabled={createTask.isPending || !newTitle.trim()}
         >
           {createTask.isPending ? (
-            <Loader2 className="h-5 w-5 animate-spin" />
+            <>
+              <Loader2 className="h-5 w-5 animate-spin" />
+              Creating...
+            </>
           ) : (
-            <Plus className="h-5 w-5" />
+            <>
+              <Plus className="h-5 w-5" />
+              Add Task
+            </>
           )}
         </button>
       </form>
@@ -55,8 +87,10 @@ export function TaskDashboard() {
             <TaskItem
               key={task.id}
               task={task}
-              onToggle={(id) => toggleTask.mutate(id)}  // Updated to use toggleTask
+              onToggle={(id) => toggleTask.mutate(id)}
               onDelete={(id) => deleteTask.mutate(id)}
+              onUpdate={(id, title, description) => updateTask.mutate({ id, title, description })}
+              isUpdating={updateTask.isPending}
             />
           ))
         ) : (

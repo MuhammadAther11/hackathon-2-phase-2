@@ -1,7 +1,7 @@
 import { authClient } from "./auth-client";
 import { getNetworkErrorMessage } from "./auth-errors";
 
-const API_URL = "https://atherali11-deploy-phase-2.hf.space";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
 
 // Custom error class that supports additional properties
 class APIError extends Error {
@@ -18,6 +18,7 @@ class APIError extends Error {
 
 export async function apiFetch<T = unknown>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const session = authClient.getSession();
+  const userId = session?.data?.user?.id;
   const token = session?.data?.token;
 
   const headers = new Headers(options.headers);
@@ -29,11 +30,14 @@ export async function apiFetch<T = unknown>(endpoint: string, options: RequestIn
     headers.set("Content-Type", "application/json");
   }
 
-  // Ensure trailing slash for GET requests without query params
-  let url = `${API_BASE_URL}${endpoint}`;
-  if (!url.endsWith('/') && !endpoint.includes('?')) {
-    url += '/';
+  // Add user_id to task endpoints
+  let finalEndpoint = endpoint;
+  if (userId && endpoint.startsWith("/tasks")) {
+    finalEndpoint = `/api/${userId}${endpoint}`;
   }
+
+  // Build final URL without forced trailing slash (let backend handle routing)
+  const url = `${API_BASE_URL}${finalEndpoint}`;
 
   try {
     const response = await fetch(url, {

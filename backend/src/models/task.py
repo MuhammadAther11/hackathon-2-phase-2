@@ -24,8 +24,10 @@ class Task(TaskBase, table=True):
         )
     )
 
-class TaskCreate(TaskBase):
-    pass
+class TaskCreate(SQLModel):
+    title: str = Field(index=True)
+    description: Optional[str] = None
+    is_completed: bool = Field(default=False)
 
 class TaskUpdate(SQLModel):
     title: Optional[str] = None

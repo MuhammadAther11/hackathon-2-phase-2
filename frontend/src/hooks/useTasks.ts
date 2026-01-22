@@ -22,10 +22,10 @@ export function useTasks() {
   }
 
   const createTask = useMutation({
-    mutationFn: (title: string) =>
+    mutationFn: (taskData: { title: string; description?: string }) =>
       apiFetch("/tasks", {
         method: "POST",
-        body: JSON.stringify({ title }),
+        body: JSON.stringify(taskData),
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
@@ -67,7 +67,7 @@ export function useTasks() {
 
   const toggleTask = useMutation({
     mutationFn: (id: string) =>
-      apiFetch(`/tasks/${id}/toggle`, {
+      apiFetch(`/tasks/${id}/complete`, {
         method: "PATCH",
       }),
     onSuccess: () => {
