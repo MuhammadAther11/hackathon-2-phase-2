@@ -7,7 +7,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-SECRET_KEY = os.getenv("BETTER_AUTH_SECRET")
+# Use the same fallback logic as in auth.py for consistency
+SECRET_KEY = os.getenv("BETTER_AUTH_SECRET") or "fallback_secret_key_for_development"
 ALGORITHM = "HS256"
 
 security = HTTPBearer(auto_error=False)

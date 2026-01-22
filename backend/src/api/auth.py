@@ -12,7 +12,7 @@ from src.services.user_service import create_user, authenticate_user
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
-# JWT settings
+# JWT settings - ensure consistency with jwt.py
 SECRET_KEY = os.getenv("BETTER_AUTH_SECRET") or "fallback_secret_key_for_development"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 24 hours
