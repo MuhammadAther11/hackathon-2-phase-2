@@ -25,8 +25,8 @@ app.add_middleware(
         "https://hackathon-2-phase-2-sigma.vercel.app"
     ],
     allow_credentials=True,
-    allow_methods=["Content-Type", "Authorization"],
-    allow_headers=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.include_router(auth_router, prefix="")
