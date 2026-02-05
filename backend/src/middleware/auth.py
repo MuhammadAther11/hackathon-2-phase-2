@@ -2,15 +2,12 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import JWTError, jwt
 from typing import Optional
-import os
 from sqlmodel import Session, select
 from src.database import get_session
 from src.models.user import User
+from src.auth.jwt import SECRET_KEY, ALGORITHM
 
-# JWT settings
-SECRET_KEY = os.getenv("BETTER_AUTH_SECRET") or "fallback_secret_key_for_development"
-ALGORITHM = "HS256"
-
+# JWT settings - imported from jwt.py for consistency
 security = HTTPBearer()
 
 def verify_token(token: str) -> Optional[str]:

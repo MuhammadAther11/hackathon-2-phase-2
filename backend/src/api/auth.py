@@ -3,18 +3,16 @@ from sqlmodel import Session
 from typing import Optional
 from pydantic import BaseModel
 from datetime import datetime, timedelta, timezone
-import os
 from jose import jwt
 
 from src.database import get_session
 from src.models.user import UserCreate, UserPublic
 from src.services.user_service import create_user, authenticate_user
+from src.auth.jwt import SECRET_KEY, ALGORITHM
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
-# JWT settings - ensure consistency with jwt.py
-SECRET_KEY = os.getenv("BETTER_AUTH_SECRET") or "fallback_secret_key_for_development"
-ALGORITHM = "HS256"
+# JWT settings - imported from jwt.py for consistency
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 24 hours
 
 class SignupRequest(BaseModel):

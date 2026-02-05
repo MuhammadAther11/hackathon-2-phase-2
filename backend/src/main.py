@@ -57,3 +57,14 @@ async def root():
 async def health():
     """Health check endpoint to verify API is running"""
     return {"status": "ok", "service": "Task Management API"}
+
+@app.get("/debug/config")
+async def debug_config():
+    """Debug endpoint to check configuration (development only)"""
+    import os
+    return {
+        "has_database_url": bool(os.getenv("DATABASE_URL")),
+        "has_better_auth_secret": bool(os.getenv("BETTER_AUTH_SECRET")),
+        "secret_length": len(os.getenv("BETTER_AUTH_SECRET", "")),
+        "frontend_url": os.getenv("FRONTEND_URL", "not set")
+    }
