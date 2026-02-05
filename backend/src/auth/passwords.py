@@ -1,11 +1,10 @@
 from passlib.context import CryptContext
 import hashlib
 
-# Use bcrypt as primary scheme for better compatibility across environments
+# Use argon2 as primary scheme, with sha256 as fallback
 pwd_context = CryptContext(
-    schemes=["bcrypt"],
+    schemes=["argon2", "sha256_crypt"],
     deprecated="auto",
-    bcrypt__rounds=12,
 )
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -19,11 +18,8 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 def get_password_hash(password: str) -> str:
     """Hash a plain password."""
     try:
-        # Truncate to 72 bytes for bcrypt compatibility
-        password_to_hash = password[:72] if len(password.encode()) > 72 else password
-        return pwd_context.hash(password_to_hash)
+        return pwd_context.hash(password)
     except Exception as e:
         print(f"Password hashing error: {e}")
-        # Fallback to simple sha256 if passlib fails
-        import hmac
-        return hmac.new(b"fallback_key", password.encode(), hashlib.sha256).hexdigest()
+        # Fallback to sha256 if passlib fails
+        return pwd_context.using(scheme="sha256_crypt").hash(password)

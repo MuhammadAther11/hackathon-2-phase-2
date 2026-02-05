@@ -41,8 +41,6 @@ def create_neon_engine():
     if "neon.tech" in DATABASE_URL:
         # Add Neon-specific connection parameters
         engine_args["connect_args"]["sslmode"] = "require"
-        # Additional parameters that might help with Neon connection issues
-        engine_args["connect_args"]["tcp_keepalive"] = True
 
     return create_engine(DATABASE_URL, **engine_args)
 
