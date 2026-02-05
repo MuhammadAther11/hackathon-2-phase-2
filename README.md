@@ -5,16 +5,16 @@ A modern, full-stack task management application with secure authentication and 
 ## 🚀 Live Deployment
 
 ### Production Links
-- **Frontend**: https://frontend-beta-drab-56.vercel.app/
+- **Frontend**: https://hackathon-2-phase-2-sigma.vercel.app/
 - **Backend API**: https://atherali11-deploy-phase-2.hf.space
 - **GitHub Repository**: https://github.com/MuhammadAther11/hackathon-2-phase-2
 
 ### Quick Access
 | Page | URL |
 |------|-----|
-| Landing | https://frontend-beta-drab-56.vercel.app |
-| Signup | https://frontend-beta-drab-56.vercel.app/signup |
-| Login | https://frontend-beta-drab-56.vercel.app/login |
+| Landing |https://hackathon-2-phase-2-sigma.vercel.app/|
+| Signup | https://hackathon-2-phase-2-sigma.vercel.app/signup |
+| Login | https://hackathon-2-phase-2-sigma.vercel.app/login |
 | API Docs | https://atherali11-deploy-phase-2.hf.space/docs |
 
 ---
