@@ -1,67 +1,47 @@
-from sqlmodel import Session, select
-from typing import Optional
-from src.models.user import User, UserCreate
-from src.auth.passwords import get_password_hash
+from sqlalchemy.orm import Session
+from passlib.context import CryptContext
+from src.models.user import User
+from src.database import get_db
 
-def create_user(*, session: Session, user_create: UserCreate) -> Optional[User]:
-    """Create a new user in the database."""
-    try:
-        # Check if user already exists
-        existing_user = session.exec(select(User).where(User.email == user_create.email)).first()
-        if existing_user:
-            print(f"[UserService] User already exists: {user_create.email}")
-            return None  # Signal that user already exists
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-        print(f"[UserService] Creating user: {user_create.email}")
 
-        # Hash the password (now with 72-byte truncation)
-        hashed_password = get_password_hash(user_create.password)
-        print(f"[UserService] Password hashed successfully")
+def hash_password(password: str) -> str:
+    return pwd_context.hash(password)
 
-        # Create the user object
-        user = User(
-            email=user_create.email,
-            password_hash=hashed_password
-        )
 
-        # Add to session and commit
-        session.add(user)
-        session.commit()
-        session.refresh(user)
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    return pwd_context.verify(plain_password, hashed_password)
 
-        print(f"[UserService] User created successfully: {user.id}")
-        return user
-    except Exception as e:
-        print(f"[UserService] Error in create_user: {str(e)}")
-        import traceback
-        traceback.print_exc()
-        raise
 
-def get_user_by_email(*, session: Session, email: str) -> Optional[User]:
-    """Get a user by email."""
-    user = session.exec(select(User).where(User.email == email)).first()
+def get_user_by_email(db: Session, email: str):
+    return db.query(User).filter(User.email == email).first()
+
+
+def create_user(db: Session, email: str, password: str):
+    existing_user = get_user_by_email(db, email)
+    if existing_user:
+        return None
+
+    hashed_password = hash_password(password)
+
+    user = User(
+        email=email,
+        hashed_password=hashed_password
+    )
+
+    db.add(user)
+    db.commit()
+    db.refresh(user)
     return user
 
-def authenticate_user(*, session: Session, email: str, password: str) -> Optional[User]:
-    """Authenticate a user by email and password."""
-    from src.auth.passwords import verify_password
 
-    try:
-        print(f"[UserService] Authenticating user: {email}")
-        user = get_user_by_email(session=session, email=email)
-        if not user:
-            print(f"[UserService] User not found: {email}")
-            return None
+def authenticate_user(db: Session, email: str, password: str):
+    user = get_user_by_email(db, email)
+    if not user:
+        return None
 
-        print(f"[UserService] User found, verifying password")
-        if not verify_password(password, user.password_hash):
-            print(f"[UserService] Password verification failed for: {email}")
-            return None
+    if not verify_password(password, user.hashed_password):
+        return None
 
-        print(f"[UserService] Authentication successful for: {email}")
-        return user
-    except Exception as e:
-        print(f"[UserService] Error in authenticate_user: {str(e)}")
-        import traceback
-        traceback.print_exc()
-        raise
+    return user
