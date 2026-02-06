@@ -21,9 +21,7 @@ def on_startup():
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://hackathon-2-phase-2-sigma.vercel.app"
-    ],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
