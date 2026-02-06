@@ -8,6 +8,13 @@ load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
+# Log database configuration on startup
+print(f"[DB] DATABASE_URL configured: {bool(DATABASE_URL)}")
+if DATABASE_URL:
+    # Mask the password for logging
+    masked_url = DATABASE_URL.split("@")[0] + "@***@***" if "@" in DATABASE_URL else "***"
+    print(f"[DB] Connection string: {masked_url}")
+
 def create_neon_engine():
     """Create database engine with Neon-specific configuration"""
     if not DATABASE_URL:

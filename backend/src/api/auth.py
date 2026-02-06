@@ -23,6 +23,11 @@ class LoginRequest(BaseModel):
     email: str
     password: str
 
+class LoginResponse(BaseModel):
+    user: UserPublic
+    access_token: str
+    token_type: str
+
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
     if expires_delta:
@@ -65,39 +70,56 @@ async def signup(
             )
 
         return UserPublic.from_orm(user)
+    except HTTPException:
+        # Re-raise HTTP exceptions as-is
+        raise
     except Exception as e:
         print(f"Error creating user: {e}")
         import traceback
         traceback.print_exc()
-        raise
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error creating user: {str(e)}"
+        )
 
-@router.post("/login")
+@router.post("/login", response_model=LoginResponse)
 async def login(
     login_data: LoginRequest,
     session: Session = Depends(get_session)
 ):
-    # Authenticate user via service
-    user = authenticate_user(session=session, email=login_data.email, password=login_data.password)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid email or password",
-            headers={"WWW-Authenticate": "Bearer"},
+    try:
+        # Authenticate user via service
+        user = authenticate_user(session=session, email=login_data.email, password=login_data.password)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid email or password",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        # Create JWT token
+        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = create_access_token(
+            data={"sub": str(user.id)},  # Use user.id as subject
+            expires_delta=access_token_expires
         )
 
-    # Create JWT token
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": str(user.id)},  # Use user.id as subject
-        expires_delta=access_token_expires
-    )
-
-    # Return user info and JWT token
-    return {
-        "user": UserPublic.from_orm(user),
-        "access_token": access_token,
-        "token_type": "bearer"
-    }
+        # Return user info and JWT token
+        return {
+            "user": UserPublic.from_orm(user),
+            "access_token": access_token,
+            "token_type": "bearer"
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error during login: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Login error: {str(e)}"
+        )
 
 @router.post("/logout", status_code=status.HTTP_200_OK)
 async def logout():
