@@ -1,47 +1,48 @@
-from sqlalchemy.orm import Session
-from passlib.context import CryptContext
-from src.models.user import User
-from src.database import get_db
+from sqlmodel import Session, select
+from typing import Optional
+from src.models.user import User, UserCreate
+from src.auth.passwords import get_password_hash
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+MAX_PASSWORD_BYTES = 72  # bcrypt limit
 
+def create_user(*, session: Session, user_create: UserCreate) -> Optional[User]:
+    """Create a new user in the database."""
+    try:
+        # Check if user already exists
+        existing_user = session.exec(
+            select(User).where(User.email == user_create.email)
+        ).first()
 
-def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+        if existing_user:
+            print(f"[UserService] User already exists: {user_create.email}")
+            return None
 
+        print(f"[UserService] Creating user: {user_create.email}")
 
-def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+        # ✅ Validate password length (bcrypt limit = 72 bytes)
+        password_bytes = user_create.password.encode("utf-8")
+        if len(password_bytes) > MAX_PASSWORD_BYTES:
+            raise ValueError("Password must be 72 characters or less")
 
+        # Hash the password safely
+        hashed_password = get_password_hash(user_create.password)
+        print(f"[UserService] Password hashed successfully")
 
-def get_user_by_email(db: Session, email: str):
-    return db.query(User).filter(User.email == email).first()
+        # Create user
+        user = User(
+            email=user_create.email,
+            password_hash=hashed_password
+        )
 
+        session.add(user)
+        session.commit()
+        session.refresh(user)
 
-def create_user(db: Session, email: str, password: str):
-    existing_user = get_user_by_email(db, email)
-    if existing_user:
-        return None
+        print(f"[UserService] User created successfully: {user.id}")
+        return user
 
-    hashed_password = hash_password(password)
-
-    user = User(
-        email=email,
-        hashed_password=hashed_password
-    )
-
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-    return user
-
-
-def authenticate_user(db: Session, email: str, password: str):
-    user = get_user_by_email(db, email)
-    if not user:
-        return None
-
-    if not verify_password(password, user.hashed_password):
-        return None
-
-    return user
+    except Exception as e:
+        print(f"[UserService] Error in create_user: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise
