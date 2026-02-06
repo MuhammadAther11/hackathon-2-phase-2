@@ -3,7 +3,7 @@ from typing import Optional
 from src.models.user import User, UserCreate
 from src.auth.passwords import get_password_hash
 
-def create_user(*, session: Session, user_create: UserCreate) -> User:
+def create_user(*, session: Session, user_create: UserCreate) -> Optional[User]:
     """Create a new user in the database."""
     # Check if user already exists
     existing_user = session.exec(select(User).where(User.email == user_create.email)).first()

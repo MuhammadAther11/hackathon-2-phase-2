@@ -35,6 +35,15 @@ interface Credentials {
 // API base URL
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
 
+// Log configuration for debugging
+if (typeof window !== "undefined") {
+  console.log("[Auth] Configuration:", {
+    API_BASE_URL,
+    NODE_ENV: process.env.NODE_ENV,
+    hasAuthSecret: !!process.env.BETTER_AUTH_SECRET,
+  });
+}
+
 // Auth client implementation
 class AuthClient {
   private token: string | null = null;
@@ -84,7 +93,8 @@ class AuthClient {
   // Signup
   async signUp(credentials: { email: string; password: string }) {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/signup`, {
+      const url = `${API_BASE_URL}/auth/signup`;
+      const response = await fetch(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -94,13 +104,16 @@ class AuthClient {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail || `Signup failed: ${response.status}`);
+        const errorMsg = errorData.detail || `Signup failed with status ${response.status}`;
+        console.error(`[Auth] Signup error at ${url}:`, { status: response.status, error: errorMsg });
+        throw new Error(errorMsg);
       }
 
       const data: SignupResponse = await response.json();
       return { user: data, error: null };
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
+      console.error("[Auth] Signup exception:", message);
       return { user: null, error: { message } };
     }
   }
@@ -108,7 +121,8 @@ class AuthClient {
   // Login
   async signIn(credentials: { email: string; password: string }) {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+      const url = `${API_BASE_URL}/auth/login`;
+      const response = await fetch(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -118,7 +132,9 @@ class AuthClient {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail || `Login failed: ${response.status}`);
+        const errorMsg = errorData.detail || `Login failed with status ${response.status}`;
+        console.error(`[Auth] Login error at ${url}:`, { status: response.status, error: errorMsg });
+        throw new Error(errorMsg);
       }
 
       const data: LoginResponse = await response.json();
@@ -129,6 +145,7 @@ class AuthClient {
       return { session: { user: data.user, token: data.access_token }, error: null };
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
+      console.error("[Auth] Login exception:", message);
       return { session: null, error: { message } };
     }
   }
