@@ -6,7 +6,7 @@ A modern, full-stack task management application with secure authentication and 
 
 ### Production Links
 - **Frontend**: https://hackathon-2-phase-2-sigma.vercel.app/
-- **Backend API**: https://atherali11-deploy-phase-2.hf.space
+- **Backend API**: https://atherali11-p2-full-stack-todo-app.hf.space
 - **GitHub Repository**: https://github.com/MuhammadAther11/hackathon-2-phase-2
 
 ### Quick Access
@@ -15,7 +15,7 @@ A modern, full-stack task management application with secure authentication and 
 | Landing |https://hackathon-2-phase-2-sigma.vercel.app/|
 | Signup | https://hackathon-2-phase-2-sigma.vercel.app/signup |
 | Login | https://hackathon-2-phase-2-sigma.vercel.app/login |
-| API Docs | https://atherali11-deploy-phase-2.hf.space/docs |
+| API Docs | https://atherali11-p2-full-stack-todo-app.hf.space |
 
 ---
 
@@ -77,7 +77,7 @@ npm install
 cp .env.example .env.local
 
 # Update with your backend URL
-# NEXT_PUBLIC_API_BASE_URL=https://atherali11-deploy-phase-2.hf.space
+# NEXT_PUBLIC_API_BASE_URL=https://atherali11-p2-full-stack-todo-app.hf.space
 ```
 
 3. **Run development server**:
@@ -108,7 +108,7 @@ cp .env.example .env
 # Update with your configuration:
 # DATABASE_URL=postgresql://user:password@host/dbname
 # BETTER_AUTH_SECRET=your-jwt-secret
-# BETTER_AUTH_URL=https://frontend-beta-drab-56.vercel.app
+# BETTER_AUTH_URL=https://atherali11-p2-full-stack-todo-app.hf.space
 ```
 
 3. **Run development server**:
@@ -124,7 +124,7 @@ python -m uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
 
 ### Base URL
 ```
-https://atherali11-deploy-phase-2.hf.space
+https://atherali11-p2-full-stack-todo-app.hf.space
 ```
 
 ### Authentication Endpoints
@@ -229,8 +229,7 @@ Response: 204 No Content
 ```
 
 ### Interactive API Docs
-Visit: https://atherali11-deploy-phase-2.hf.space/docs
-
+Visit: https://atherali11-p2-full-stack-todo-app.hf.space
 ---
 
 ## 🧪 Testing
@@ -323,11 +322,11 @@ phase-2/
 ### Frontend (Vercel)
 The frontend is deployed on Vercel and automatically redeploys on git push.
 
-**URL**: https://frontend-beta-drab-56.vercel.app
+**URL**: https://hackathon-2-phase-2-sigma.vercel.app/
 
 **Environment Variables** (set in Vercel dashboard):
 ```
-NEXT_PUBLIC_API_BASE_URL=https://atherali11-deploy-phase-2.hf.space
+NEXT_PUBLIC_API_BASE_URL=https://atherali11-p2-full-stack-todo-app.hf.space
 BETTER_AUTH_SECRET=[your-jwt-secret]
 BETTER_AUTH_URL=https://frontend-beta-drab-56.vercel.app
 ```
@@ -335,13 +334,12 @@ BETTER_AUTH_URL=https://frontend-beta-drab-56.vercel.app
 ### Backend (Hugging Face Spaces)
 The backend is deployed on HF Spaces with continuous deployment.
 
-**URL**: https://atherali11-deploy-phase-2.hf.space
-
+**URL**: https://atherali11-p2-full-stack-todo-app.hf.space
 **Environment Variables**:
 ```
 DATABASE_URL=postgresql://...
 BETTER_AUTH_SECRET=[your-jwt-secret]
-BETTER_AUTH_URL=https://frontend-beta-drab-56.vercel.app
+BETTER_AUTH_URL=https://hackathon-2-phase-2-sigma.vercel.app/
 ```
 
 ---
@@ -386,11 +384,10 @@ This is a hackathon project. To contribute:
 ### Frontend (.env.local)
 ```bash
 # Backend API URL
-NEXT_PUBLIC_API_BASE_URL=https://atherali11-deploy-phase-2.hf.space
-
+NEXT_PUBLIC_API_BASE_URL=https://atherali11-p2-full-stack-todo-app.hf.space
 # Better Auth Configuration
 BETTER_AUTH_SECRET=[your-jwt-secret]
-BETTER_AUTH_URL=https://frontend-beta-drab-56.vercel.app
+BETTER_AUTH_URL=https://hackathon-2-phase-2-sigma.vercel.app/
 ```
 
 ### Backend (.env)
@@ -402,7 +399,7 @@ DATABASE_URL=postgresql://user:password@host:5432/dbname
 BETTER_AUTH_SECRET=[your-jwt-secret]
 
 # Frontend URL (for CORS)
-BETTER_AUTH_URL=https://frontend-beta-drab-56.vercel.app
+BETTER_AUTH_URL=https://hackathon-2-phase-2-sigma.vercel.app/
 
 # Optional: Debug mode
 DEBUG=false
@@ -480,7 +477,7 @@ This is a hackathon project. All rights reserved.
 
 ## 🎯 Quick Start
 
-1. **Visit the app**: https://frontend-beta-drab-56.vercel.app
+1. **Visit the app**: https://hackathon-2-phase-2-sigma.vercel.app/
 2. **Sign up** with your email
 3. **Create tasks** with descriptions (optional!)
 4. **Manage tasks**: Edit, toggle completion, or delete
