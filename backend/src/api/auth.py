@@ -45,12 +45,6 @@ async def signup(
     signup_data: SignupRequest,
     session: Session = Depends(get_session)
 ):
-    if "@" not in signup_data.email or "." not in signup_data.email:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Invalid email format"
-        )
-
     if len(signup_data.password) < 8:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -63,10 +57,11 @@ async def signup(
     )
 
     user = create_user(session=session, user_create=user_create)
-    if user is None:
+
+    if not user:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="Email already registered"
+            detail="Email already registered or invalid password"
         )
 
     return UserPublic.from_orm(user)
@@ -86,8 +81,7 @@ async def login(
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid email or password",
-            headers={"WWW-Authenticate": "Bearer"},
+            detail="Invalid email or password"
         )
 
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
