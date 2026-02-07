@@ -77,7 +77,7 @@ npm install
 cp .env.example .env.local
 
 # Update with your backend URL
-# NEXT_PUBLIC_API_BASE_URL=https://atherali11-p2-full-stack-todo-app.hf.space
+# NEXT_PUBLIC_API_BASE_URL=https://hackathon-2-phase-2-sigma.vercel.app/
 ```
 
 3. **Run development server**:
@@ -328,7 +328,7 @@ The frontend is deployed on Vercel and automatically redeploys on git push.
 ```
 NEXT_PUBLIC_API_BASE_URL=https://atherali11-p2-full-stack-todo-app.hf.space
 BETTER_AUTH_SECRET=[your-jwt-secret]
-BETTER_AUTH_URL=https://frontend-beta-drab-56.vercel.app
+BETTER_AUTH_URL=https://hackathon-2-phase-2-sigma.vercel.app/
 ```
 
 ### Backend (Hugging Face Spaces)
